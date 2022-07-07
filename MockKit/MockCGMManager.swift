@@ -475,15 +475,11 @@ public final class MockCGMManager: TestingCGMManager {
     public static var healthKitStorageDelay: TimeInterval = 0
     
     private func logDeviceCommunication(_ message: String, type: DeviceLogEntryType = .send) {
-        self.delegate.notify { (delegate) in
-            delegate?.deviceManager(self, logEventForDeviceIdentifier: "MockId", type: type, message: message, completion: nil)
-        }
+        self.delegate.delegate?.deviceManager(self, logEventForDeviceIdentifier: "MockId", type: type, message: message, completion: nil)
     }
 
     private func logDeviceComms(_ type: DeviceLogEntryType, message: String) {
-        delegate.notify { (delegate) in
-            delegate?.deviceManager(self, logEventForDeviceIdentifier: "mockcgm", type: type, message: message, completion: nil)
-        }
+        self.delegate.delegate?.deviceManager(self, logEventForDeviceIdentifier: "mockcgm", type: type, message: message, completion: nil)
     }
 
     private func sendCGMReadingResult(_ result: CGMReadingResult) {
