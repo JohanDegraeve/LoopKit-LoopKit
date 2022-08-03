@@ -553,6 +553,13 @@ extension Collection where Element == DoseEntry {
 
         repeat {
             let value = reduce(0) { (value, dose) -> Double in
+                
+                // don't take into account temp basals set by myself (ie manual) when calculating impact of IOB in glucose
+                // because I try to use temp basals to handle long term impact of fat. 
+                if (dose.automatic == nil || dose.automatic == false), dose.type == .tempBasal {
+                    return value
+                }
+                
                 return value + dose.glucoseEffect(at: date, model: insulinModelProvider.model(for: dose.insulinType), insulinSensitivity: insulinSensitivity.quantity(at: dose.startDate).doubleValue(for: unit), delta: delta)
             }
 
