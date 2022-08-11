@@ -9,7 +9,6 @@
 import Foundation
 import HealthKit
 
-
 extension DoseEntry {
     private func continuousDeliveryInsulinOnBoard(at date: Date, model: InsulinModel, delta: TimeInterval) -> Double {
         let doseDuration = endDate.timeIntervalSince(startDate)  // t1
@@ -555,8 +554,9 @@ extension Collection where Element == DoseEntry {
             let value = reduce(0) { (value, dose) -> Double in
                 
                 // don't take into account temp basals set by myself (ie manual) when calculating impact of IOB in glucose
-                // because I try to use temp basals to handle long term impact of fat. 
-                if (dose.automatic == nil || dose.automatic == false), dose.type == .tempBasal {
+                // because I try to use temp basals to handle long term impact of fat.
+                // can be disabled in UserDefaults
+                if (dose.automatic == nil || dose.automatic == false), dose.type == .tempBasal, !UserDefaults.standard.bool(forKey: "keyForAddManualTempBasals") {
                     return value
                 }
                 
