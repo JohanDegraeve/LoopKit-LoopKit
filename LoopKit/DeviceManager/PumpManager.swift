@@ -183,7 +183,8 @@ public protocol PumpManager: DeviceManager {
     ///   - duration: The duration of the temporary basal rate.  If you pass in a duration of 0, that cancels any currently running Temp Basal
     ///   - completion: A closure called after the command is complete
     ///   - error: An optional error describing why the command failed
-    func enactTempBasal(unitsPerHour: Double, for duration: TimeInterval, completion: @escaping (_ error: PumpManagerError?) -> Void)
+    ///   - automatic : used as workaround, for temp basals only, if set to false, they will not be taken into account in glucose effect calculation (depending on userdefaults setting keyForAddManualTempBasals)
+    func enactTempBasal(unitsPerHour: Double, for duration: TimeInterval, automatic: Bool, completion: @escaping (_ error: PumpManagerError?) -> Void)
 
     /// Send a command to the pump to suspend delivery
     ///
