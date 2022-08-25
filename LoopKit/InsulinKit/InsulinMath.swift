@@ -560,7 +560,28 @@ extension Collection where Element == DoseEntry {
                     return value
                 }
                 
-                return value + dose.glucoseEffect(at: date, model: insulinModelProvider.model(for: dose.insulinType), insulinSensitivity: insulinSensitivity.quantity(at: dose.startDate).doubleValue(for: unit), delta: delta)
+                // if keyForUseVariableBasal = true, then I'm using a too high basal rate. In that case also negative IOB should be reduced with the same percentage as used when reducing the basal if glucose value below average correction
+                // the calculation here is not fully correct, it's just a small gain. It's to avoid that Loop starts overcorrecting with microbolusses, becuase it over estimates future glucose values, due to a too high basal rate.
+                
+                let glucoseEffect = dose.glucoseEffect(at: date, model: insulinModelProvider.model(for: dose.insulinType), insulinSensitivity: insulinSensitivity.quantity(at: dose.startDate).doubleValue(for: unit), delta: delta)
+                
+                // read latest value from userdefaults, those are written there by xdrip-client-swift
+                if let latestGlucoseTimeStamp = UserDefaults.standard.object(forKey: "keyForLatestGlucoseTimeStamp") as? Date, abs(latestGlucoseTimeStamp.timeIntervalSinceNow) < 600.0, UserDefaults.standard.double(forKey: "keyForLatestGlucoseValue") > 0 {
+                    
+                    // read latest glucose value from userdefaults, written there by xdrip-client-swift
+                    let latestGlucoseValue = UserDefaults.standard.double(forKey: "keyForLatestGlucoseValue")
+
+                    // if positive glucose effect, and if latest glucose value < 115, then apply the percentage set in keyForPercentageVariableBasal
+                    if glucoseEffect > 0.0 && UserDefaults.standard.bool(forKey: "keyForUseVariableBasal"), latestGlucoseValue < 115 {
+                        
+                        return value + glucoseEffect * Double(UserDefaults.standard.integer(forKey: "keyForPercentageVariableBasal"))/100.0
+                        
+                    }
+
+                }
+                
+                return value + glucoseEffect
+                
             }
 
             values.append(GlucoseEffect(startDate: date, quantity: HKQuantity(unit: unit, doubleValue: value)))
