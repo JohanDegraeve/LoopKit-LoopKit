@@ -550,12 +550,23 @@ extension Collection where Element == DoseEntry {
         var values = [GlucoseEffect]()
         let unit = HKUnit.milligramsPerDeciliter
 
+        // check if keyForAddManualTempBasals needs to be set to false
+        if let timeStampStartOfAutoBasal = UserDefaults.standard.object(forKey: "keyTimeStampStartAddManualTempBasals") as? Date, UserDefaults.standard.integer(forKey: "keyForDurationAddManualTempBasalsInHours") > 0, abs(timeStampStartOfAutoBasal.timeIntervalSinceNow) > TimeInterval(hours: Double(UserDefaults.standard.integer(forKey: "keyForDurationAddManualTempBasalsInHours"))){
+            
+            print("keyTimeStampStartAddManualTempBasals = \(timeStampStartOfAutoBasal.description(with: .current))")
+            print("duration = \(UserDefaults.standard.integer(forKey: "keyForDurationAddManualTempBasalsInHours").description)")
+            
+            UserDefaults.standard.set(false, forKey: "keyForAddManualTempBasals")
+            
+        }
+
+        
         repeat {
             let value = reduce(0) { (value, dose) -> Double in
                 
                 // don't take into account temp basals set by myself (ie manual) when calculating impact of IOB in glucose
                 // because I try to use temp basals to handle long term impact of fat.
-                // can be disabled in UserDefaults
+                // can be disabled in UserDefaults for a number of hours
                 if (dose.automatic == nil || dose.automatic == false), dose.type == .tempBasal, !UserDefaults.standard.bool(forKey: "keyForAddManualTempBasals") {
                     return value
                 }
