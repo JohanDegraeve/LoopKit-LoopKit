@@ -139,9 +139,9 @@ public struct CorrectionRangeScheduleEditor: View {
     var guardrailWarningIfNecessary: some View {
         let crossedThresholds = self.crossedThresholds
         return Group {
-            if !crossedThresholds.isEmpty && (userDidTap || mode == .settings) {
+            /*if !crossedThresholds.isEmpty && (userDidTap || mode == .settings) {
                 CorrectionRangeGuardrailWarning(crossedThresholds: crossedThresholds)
-            }
+            }*/
         }
     }
 

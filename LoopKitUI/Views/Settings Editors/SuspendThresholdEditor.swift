@@ -120,9 +120,9 @@ public struct SuspendThresholdEditor: View {
             },
             actionAreaContent: {
                 instructionalContentIfNecessary
-                if warningThreshold != nil && (userDidTap || mode != .acceptanceFlow) {
+                /*if warningThreshold != nil && (userDidTap || mode != .acceptanceFlow) {
                     SuspendThresholdGuardrailWarning(safetyClassificationThreshold: warningThreshold!)
-                }
+                }*/
             },
             action: {
                 if self.warningThreshold == nil {

@@ -288,9 +288,9 @@ public struct DeliveryLimitsEditor: View {
     private var guardrailWarningIfNecessary: some View {
         let crossedThresholds = self.crossedThresholds
         return Group {
-            if !crossedThresholds.isEmpty && (userDidTap || mode == .settings) {
+            /*if !crossedThresholds.isEmpty && (userDidTap || mode == .settings) {
                 DeliveryLimitsGuardrailWarning(crossedThresholds: crossedThresholds, value: value)
-            }
+            }*/
         }
     }
 
