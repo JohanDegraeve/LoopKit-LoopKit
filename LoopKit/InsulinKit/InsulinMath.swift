@@ -79,7 +79,52 @@ extension DoseEntry {
         if endDate.timeIntervalSince(startDate) <= 1.05 * delta {
             return netBasalUnits * -insulinSensitivity * (1.0 - model.percentEffectRemaining(at: time))
         } else {
-            return netBasalUnits * -insulinSensitivity * continuousDeliveryGlucoseEffect(at: date, model: model, delta: delta)
+            if netBasalUnits < 0 || endDate < Date() {
+                // this is a temp basal < scheduled basal rate
+                //     in that case calculate full effect, otherwise Loop may continue to decide to lower the basal, while it's not necessary anymore
+                // or it's a temp basal already fully delivered
+                return netBasalUnits * -insulinSensitivity * continuousDeliveryGlucoseEffect(at: date, model: model, delta: delta)
+            } else {
+                
+                // first calculate units already delivered
+                // double check that it's a temp basal, modified calculation will only be done for temp basal
+                if type == .tempBasal {
+
+                    /// unit size for omnipod Dash
+                    let unitSize = 0.05 // omnipod dash
+                    
+                    /// amount of doses that will be delivered during the temp basal period
+                    let amountOfDoses = Int(netBasalUnits/unitSize)
+                    
+                    /// difference between end and start,
+                    let doseDuration = endDate.timeIntervalSince(startDate)
+                    
+                    /// diff between now and start
+                    let durationToCover = Date().timeIntervalSince(startDate)
+                    
+                    /// time between two doses
+                    let timeBetweenDoses = Double(doseDuration)/Double(amountOfDoses)
+                    
+                    /// omnipod starts giving temp dose at the end of the interval,
+                    /// - so possible there's nothing delivered yet, in which case timeProcessed > durationToCover
+                    var timeProcessed = TimeInterval(timeBetweenDoses - 10.0)
+                    
+                    /// this will be actual dose to use
+                    var netBasalToUse = 0.0
+                    
+                    while timeProcessed < durationToCover && netBasalToUse < netBasalUnits {
+                        netBasalToUse += unitSize
+                        timeProcessed += timeBetweenDoses
+                    }
+                    
+                    return netBasalToUse * -insulinSensitivity * continuousDeliveryGlucoseEffect(at: date, model: model, delta: delta)
+
+                } else {
+                    // type is  not tempbasal
+                    return netBasalUnits * -insulinSensitivity * continuousDeliveryGlucoseEffect(at: date, model: model, delta: delta)
+                }
+
+            }
         }
     }
 
@@ -552,9 +597,6 @@ extension Collection where Element == DoseEntry {
 
         // check if keyForAddManualTempBasals needs to be set to false
         if let timeStampStartOfAutoBasal = UserDefaults.standard.object(forKey: "keyTimeStampStartAddManualTempBasals") as? Date, UserDefaults.standard.integer(forKey: "keyForDurationAddManualTempBasalsInHours") > 0, abs(timeStampStartOfAutoBasal.timeIntervalSinceNow) > TimeInterval(hours: Double(UserDefaults.standard.integer(forKey: "keyForDurationAddManualTempBasalsInHours"))){
-            
-            print("keyTimeStampStartAddManualTempBasals = \(timeStampStartOfAutoBasal.description(with: .current))")
-            print("duration = \(UserDefaults.standard.integer(forKey: "keyForDurationAddManualTempBasalsInHours").description)")
             
             UserDefaults.standard.set(false, forKey: "keyForAddManualTempBasals")
             
