@@ -595,23 +595,8 @@ extension Collection where Element == DoseEntry {
         var values = [GlucoseEffect]()
         let unit = HKUnit.milligramsPerDeciliter
 
-        // check if keyForAddManualTempBasals needs to be set to false
-        if let timeStampStartOfAutoBasal = UserDefaults.standard.object(forKey: "keyTimeStampStartAddManualTempBasals") as? Date, UserDefaults.standard.integer(forKey: "keyForDurationAddManualTempBasalsInHours") > 0, abs(timeStampStartOfAutoBasal.timeIntervalSinceNow) > TimeInterval(hours: Double(UserDefaults.standard.integer(forKey: "keyForDurationAddManualTempBasalsInHours"))){
-            
-            UserDefaults.standard.set(false, forKey: "keyForAddManualTempBasals")
-            
-        }
-
-        
         repeat {
             let value = reduce(0) { (value, dose) -> Double in
-                
-                // don't take into account temp basals set by myself (ie manual) when calculating impact of IOB in glucose
-                // because I try to use temp basals to handle long term impact of fat.
-                // can be disabled in UserDefaults for a number of hours
-                if (dose.automatic == nil || dose.automatic == false), dose.type == .tempBasal, !UserDefaults.standard.bool(forKey: "keyForAddManualTempBasals") {
-                    return value
-                }
                 
                 // if keyForUseVariableBasal = true, then I'm using a too high basal rate. In that case also negative IOB should be reduced with the same percentage as used when reducing the basal if glucose value below average correction
                 // the calculation here is not fully correct, it's just a small gain. It's to avoid that Loop starts overcorrecting with microbolusses, becuase it over estimates future glucose values, due to a too high basal rate.
