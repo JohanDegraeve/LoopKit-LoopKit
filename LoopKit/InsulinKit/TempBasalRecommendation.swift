@@ -15,6 +15,12 @@ public struct TempBasalRecommendation: Equatable {
     // just to distinguish between temp basals that need to be taken into account for glucose effect or not
     // temp basal recommendations are always automatic, but for the sake of being able to have a variable basal, I'm using this variable as workaround.
     public var automatic: Bool = true
+    
+    /// don't take into account temp basals by variable basal algorithm
+    /// - abusing here manuallyEntered and automatic
+    ///   - manuallyEntered true means it's set by variable basal algorithm
+    ///   - automatic = false, is to avoid that normal Loop stops this type of temp basal
+    public var manuallyEntered: Bool =  false
 
     /// A special command which cancels any existing temp basals
     public static var cancel: TempBasalRecommendation {
