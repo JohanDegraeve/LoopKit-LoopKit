@@ -598,14 +598,6 @@ extension Collection where Element == DoseEntry {
         repeat {
             let value = reduce(0) { (value, dose) -> Double in
                 
-                // don't take into account temp basals by variable basal algorithm
-                // abusing here manuallyEntered and automatic
-                //   manuallyEntered true means it's set by variable basal algorithm
-                //   automatic = false, is to avoid that normal Loop stops this type of temp basal
-                if (dose.automatic == nil || dose.automatic == false), dose.type == .tempBasal, dose.manuallyEntered == true {
-                    return value
-                }
-                
                 // if keyForUseVariableBasal = true, then I'm using a too high basal rate. In that case also negative IOB should be reduced with the same percentage as used when reducing the basal if glucose value below average correction
                 // the calculation here is not fully correct, it's just a small gain. It's to avoid that Loop starts overcorrecting with microbolusses, becuase it over estimates future glucose values, due to a too high basal rate.
                 
