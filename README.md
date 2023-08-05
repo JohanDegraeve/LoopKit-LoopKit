@@ -7,6 +7,3 @@ Personal changes :
 because I try to use temp basals to handle long term impact of fat.
 This is configurable in xDrip4iOS UI
 
-- Fiasp duration 5 hours
-
-- enable/disable manual tempbasal in IOB via UI
