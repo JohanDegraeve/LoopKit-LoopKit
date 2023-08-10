@@ -610,10 +610,24 @@ extension Collection where Element == DoseEntry {
                     let latestGlucoseValue = UserDefaults.standard.double(forKey: "keyForLatestGlucoseValue")
 
                     // if positive glucose effect, and if latest glucose value < 115, then apply the percentage set in keyForPercentageVariableBasal
-                    if glucoseEffect > 0.0 && UserDefaults.standard.bool(forKey: "keyForUseVariableBasal"), latestGlucoseValue < 115 {
+                    if glucoseEffect > 0.0 && UserDefaults.standard.bool(forKey: "keyForUseVariableBasal") {
                         
-                        return value + glucoseEffect * Double(UserDefaults.standard.integer(forKey: "keyForPercentageVariableBasal"))/100.0
+                        if latestGlucoseValue < 115 {
+                            
+                            return value + glucoseEffect * Double(UserDefaults.standard.integer(forKey: "keyForPercentageVariableBasal"))/100.0
+                            
+                        }
                         
+                        // to avoid a sudden too high correction bolus, add another decrease in glucose effect, percentage to apply is between keyForUseVariableBasal and 100
+                        // if latestGlucoseValue < 150
+                        let percentageToApply = Double(UserDefaults.standard.integer(forKey: "keyForPercentageVariableBasal")) + (100.0 - Double(UserDefaults.standard.integer(forKey: "keyForPercentageVariableBasal")))/2
+                        
+                        if latestGlucoseValue < 150 {
+
+                            return value + glucoseEffect * percentageToApply/100.0
+                            
+                        }
+
                     }
 
                 }
